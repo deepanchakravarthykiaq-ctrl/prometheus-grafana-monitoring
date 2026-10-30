@@ -1,0 +1,52 @@
+# PromQL queries and explanations
+
+Run these in **Prometheus → Graph** or use them in Grafana panels.
+
+1. **Target availability**
+   ```promql
+   up
+   ```
+   `1` means the scrape target is reachable; `0` means scraping failed.
+
+2. **CPU usage percentage (last 5 minutes)**
+   ```promql
+   (1 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m]))) * 100
+   ```
+   Calculates the percentage of CPU time not spent idle.
+
+3. **Memory usage percentage**
+   ```promql
+   (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100
+   ```
+   Uses available memory rather than only free memory.
+
+4. **Root filesystem usage percentage**
+   ```promql
+   (1 - (node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|overlay|squashfs"} /
+   node_filesystem_size_bytes{mountpoint="/",fstype!~"tmpfs|overlay|squashfs"})) * 100
+   ```
+   Shows used capacity for the root filesystem.
+
+5. **Network receive rate**
+   ```promql
+   sum by (device) (rate(node_network_receive_bytes_total{device!="lo"}[5m]))
+   ```
+   Shows incoming bytes per second, excluding loopback.
+
+6. **System load average (1 minute)**
+   ```promql
+   node_load1
+   ```
+   Shows the Linux 1-minute load average.
+
+7. **Available memory in GiB**
+   ```promql
+   node_memory_MemAvailable_bytes / 1024^3
+   ```
+   Converts available memory from bytes to GiB.
+
+8. **Node uptime in days**
+   ```promql
+   (time() - node_boot_time_seconds) / 86400
+   ```
+   Calculates elapsed time since the last boot.
